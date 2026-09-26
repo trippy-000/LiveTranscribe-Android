@@ -13,47 +13,41 @@ import kotlinx.coroutines.flow.map
 
 private val Context.premiumDataStore by preferencesDataStore(name = "premium_entitlements")
 
-/**
- * Local cache for [PremiumState]. Deliberately a separate DataStore from
-  * `caption_settings` so a corrupt/cleared entitlement cache can never affect
-   * unrelated app settings. Both flavor [com.charles.livecaptionn.billing.PremiumRepository]
-    * implementations write through this store; the rest of the app only ever
-     * reads entitlement via the repository's Flow.
-      */
-      class PremiumLocalStore(private val context: Context) {
+class PremiumLocalStore(private val context: Context) {
 
-          val stateFlow: Flow<PremiumState> = context.premiumDataStore.data.map { it.toPremiumState() }
+    val stateFlow: Flow<PremiumState> = context.premiumDataStore.data.map { it.toPremiumState() }
 
-              suspend fun save(state: PremiumState) {
-                      context.premiumDataStore.edit { p ->
-                                  p[ENTITLEMENTS] = state.entitlements.map { it.name }.toSet()
-                                              state.sourceEmail?.let { p[SOURCE_EMAIL] = it } ?: p.remove(SOURCE_EMAIL)
-                                                          state.licenseToken?.let { p[LICENSE_TOKEN] = it } ?: p.remove(LICENSE_TOKEN)
-                                                                      p[LAST_VERIFIED_AT] = state.lastVerifiedAtMillis
-                                                                                  state.gracePeriodExpiresAtMillis?.let { p[GRACE_PERIOD_EXPIRES_AT] = it }
-                                                                                                  ?: p.remove(GRACE_PERIOD_EXPIRES_AT)
-                                                                                                          }
-                                                                                                              }
+        suspend fun save(state: PremiumState) {
+                context.premiumDataStore.edit { p ->
+                            p[ENTITLEMENTS] = state.entitlements.map { it.name }.toSet()
+                                        state.sourceEmail?.let { p[SOURCE_EMAIL] = it } ?: p.remove(SOURCE_EMAIL)
+                                                    state.licenseToken?.let { p[LICENSE_TOKEN] = it } ?: p.remove(LICENSE_TOKEN)
+                                                                p[LAST_VERIFIED_AT] = state.lastVerifiedAtMillis
+                                                                            state.gracePeriodExpiresAtMillis?.let { p[GRACE_PERIOD_EXPIRES_AT] = it }
+                                                                                            ?: p.remove(GRACE_PERIOD_EXPIRES_AT)
+                                                                                                    }
+                                                                                                        }
 
-                                                                                                                  suspend fun clear() {
-                                                                                                                          context.premiumDataStore.edit { it.clear() }
-                                                                                                                              }
+                                                                                                            suspend fun clear() {
+                                                                                                                    context.premiumDataStore.edit { it.clear() }
+                                                                                                                        }
 
-                                                                                                                                  private fun androidx.datastore.preferences.core.Preferences.toPremiumState(): PremiumState {
-                                                                                                                                          return PremiumState(
-                                                                                                                                                      entitlements = Entitlement.values().toSet(),
-                                                                                                                                                                  sourceEmail = "pro@unlocked.local",
-                                                                                                                                                                              licenseToken = "lifetime_unlocked",
-                                                                                                                                                                                          lastVerifiedAtMillis = System.currentTimeMillis(),
-                                                                                                                                                                                                      gracePeriodExpiresAtMillis = null
-                                                                                                                                                                                                              )
-                                                                                                                                                                                                                  }
+                                                                                                                            private fun androidx.datastore.preferences.core.Preferences.toPremiumState(): PremiumState {
+                                                                                                                                    return PremiumState(
+                                                                                                                                                entitlements = Entitlement.values().toSet(),
+                                                                                                                                                            sourceEmail = "pro@unlocked.local",
+                                                                                                                                                                        licenseToken = "lifetime_unlocked",
+                                                                                                                                                                                    lastVerifiedAtMillis = System.currentTimeMillis(),
+                                                                                                                                                                                                gracePeriodExpiresAtMillis = null
+                                                                                                                                                                                                        )
+                                                                                                                                                                                                            }
 
-                                                                                                                                                                                                                      private companion object {
-                                                                                                                                                                                                                              val ENTITLEMENTS = stringSetPreferencesKey("entitlements")
-                                                                                                                                                                                                                                      val SOURCE_EMAIL = stringPreferencesKey("source_email")
-                                                                                                                                                                                                                                              val LICENSE_TOKEN = stringPreferencesKey("license_token")
-                                                                                                                                                                                                                                                      val LAST_VERIFIED_AT = longPreferencesKey("last_verified_at")
-                                                                                                                                                                                                                                                              val GRACE_PERIOD_EXPIRES_AT = longPreferencesKey("grace_period_expires_at")
-                                                                                                                                                                                                                                                                  }
-                                                                                                                                                                                                                                                                  }
+                                                                                                                                                                                                                private companion object {
+                                                                                                                                                                                                                        val ENTITLEMENTS = stringSetPreferencesKey("entitlements")
+                                                                                                                                                                                                                                val SOURCE_EMAIL = stringPreferencesKey("source_email")
+                                                                                                                                                                                                                                        val LICENSE_TOKEN = stringPreferencesKey("license_token")
+                                                                                                                                                                                                                                                val LAST_VERIFIED_AT = longPreferencesKey("last_verified_at")
+                                                                                                                                                                                                                                                        val GRACE_PERIOD_EXPIRES_AT = longPreferencesKey("grace_period_expires_at")
+                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                                            
