@@ -33,3 +33,4 @@ jobs:
         with:
           name: LiveCaptionN-Debug-APK
           path: app/build/outputs/apk/debug/*.apk
+#plz
